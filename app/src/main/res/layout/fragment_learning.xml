@@ -29,46 +29,45 @@
                 android:padding="16dp">
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="학습 포털 자리"
-                    android:textColor="@color/text_primary"
-                    android:textStyle="bold"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="포털 메뉴 연결을 여기에 구성하세요."
-                    android:textColor="#475569"
-                    android:textSize="13sp"
-                    android:paddingTop="6dp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            app:cardCornerRadius="14dp"
-            app:cardElevation="6dp"
-            app:cardBackgroundColor="@color/card_tint"
-            app:strokeWidth="1dp"
-            app:strokeColor="@color/sky_stroke">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="내 그룹"
                     android:textStyle="bold"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp" />
+
+                <LinearLayout
+                    android:id="@+id/learningGroupAdminActions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="end"
+                    android:visibility="gone">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonAddGroup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="추가"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:textColor="@color/purple_500" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonDeleteGroup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="삭제"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:textColor="@color/purple_500" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonAddMember"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="멤버 추가"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:textColor="@color/purple_500" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/learningGroupList"
@@ -108,10 +107,76 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="그룹 멤버"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp" />
+
+                <Spinner
+                    android:id="@+id/learningMemberGroupSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp" />
+
+                <LinearLayout
+                    android:id="@+id/learningMemberList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="10dp"
+                    android:divider="@android:color/transparent"
+                    android:showDividers="middle" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="@color/card_tint"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/sky_stroke">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="그룹 과제"
                     android:textStyle="bold"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp" />
+
+                <LinearLayout
+                    android:id="@+id/learningTaskAdminActions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="end"
+                    android:visibility="gone">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonAddTask"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="추가"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:textColor="@color/purple_500" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonDeleteTask"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="삭제"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:textColor="@color/purple_500" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/learningTaskList"
@@ -155,6 +220,31 @@
                     android:textStyle="bold"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp" />
+
+                <LinearLayout
+                    android:id="@+id/learningNoticeAdminActions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="end"
+                    android:visibility="gone">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonAddNotice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="추가"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:textColor="@color/purple_500" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonDeleteNotice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="삭제"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:textColor="@color/purple_500" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/learningNoticeList"

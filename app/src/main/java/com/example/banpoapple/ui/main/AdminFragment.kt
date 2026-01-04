@@ -49,11 +49,11 @@ class AdminFragment : Fragment() {
 
             val announcements = repo.fetchNotices().getOrNull().orEmpty()
             renderAnnouncements(announcementList, announcements)
-            renderPagination(view.findViewById(R.id.paginationAnnouncements))
+            renderPagination(view.findViewById(R.id.paginationAnnouncements), announcements.size)
 
             val reviews = repo.fetchReviews().getOrNull().orEmpty()
             renderReviews(reviewList, reviews)
-            renderPagination(view.findViewById(R.id.paginationReviews))
+            renderPagination(view.findViewById(R.id.paginationReviews), reviews.size)
 
             val schedules = repo.fetchSchedules().getOrNull().orEmpty()
             renderSchedules(scheduleList, schedules)
@@ -158,9 +158,14 @@ class AdminFragment : Fragment() {
         container.addView(tv)
     }
 
-    private fun renderPagination(container: LinearLayout, totalPages: Int = 5, onSelect: ((Int) -> Unit)? = null) {
+    private fun renderPagination(container: LinearLayout, totalPages: Int, onSelect: ((Int) -> Unit)? = null) {
         container.removeAllViews()
-        val pages = (0 until maxOf(totalPages, 5)).take(5).map { it + 1 }
+        if (totalPages <= 1) {
+            container.visibility = View.GONE
+            return
+        }
+        container.visibility = View.VISIBLE
+        val pages = (0 until totalPages).map { it + 1 }
         pages.forEachIndexed { index, page ->
             val tv = TextView(requireContext()).apply {
                 text = page.toString()

@@ -2,24 +2,11 @@
 <project version="4">
   <component name="deploymentTargetSelector">
     <selectionStates>
+      <SelectionState runConfigName="applerak">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-12-31T16:05:00.442285400Z">
-          <Target type="DEFAULT_BOOT">
-            <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\user\.android\avd\Medium_Phone.avd" />
-            </handle>
-          </Target>
-        </DropdownSelection>
-        <DialogSelection>
-          <targets>
-            <Target type="DEFAULT_BOOT">
-              <handle>
-                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\user\.android\avd\Medium_Phone.avd" />
-              </handle>
-            </Target>
-          </targets>
-        </DialogSelection>
       </SelectionState>
     </selectionStates>
   </component>

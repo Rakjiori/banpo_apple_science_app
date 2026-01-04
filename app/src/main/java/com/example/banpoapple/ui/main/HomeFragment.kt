@@ -24,6 +24,12 @@ import com.example.banpoapple.network.GroupTaskResponse
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
+    private val noticesPerPage = 3
+    private val reviewsPerPage = 3
+    private var currentNoticePage = 0
+    private var currentReviewPage = 0
+    private var noticeItems: List<NoticeResponse> = emptyList()
+    private var reviewItems: List<ReviewResponse> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,7 +41,9 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val scheduleList = view.findViewById<LinearLayout>(R.id.scheduleList)
         val announcementList = view.findViewById<LinearLayout>(R.id.announcementList)
+        val announcementPageNumbers = view.findViewById<LinearLayout>(R.id.announcementPageNumbers)
         val reviewList = view.findViewById<LinearLayout>(R.id.reviewList)
+        val reviewPageNumbers = view.findViewById<LinearLayout>(R.id.reviewPageNumbers)
         val groupList = view.findViewById<LinearLayout>(R.id.groupList)
         val headerBell = view.findViewById<View>(R.id.headerBell)
         val headerGroup = view.findViewById<View>(R.id.headerGroup)
@@ -46,7 +54,9 @@ class HomeFragment : Fragment() {
             scheduleList,
             announcementList,
             reviewList,
-            groupList
+            groupList,
+            announcementPageNumbers,
+            reviewPageNumbers
         )
     }
 
@@ -118,14 +128,16 @@ class HomeFragment : Fragment() {
         scheduleContainer: LinearLayout,
         announcementContainer: LinearLayout,
         reviewContainer: LinearLayout,
-        groupContainer: LinearLayout
+        groupContainer: LinearLayout,
+        announcementPageNumbers: LinearLayout,
+        reviewPageNumbers: LinearLayout
     ) {
         viewLifecycleOwner.lifecycleScope.launch {
             AppContainer.contentRepository.fetchHomeFeed().fold(
                 onSuccess = { feed ->
                     renderSchedules(scheduleContainer, feed.schedules)
-                    renderAnnouncements(announcementContainer, feed.notices)
-                    renderReviews(reviewContainer, feed.reviews)
+                    renderAnnouncements(announcementContainer, feed.notices, announcementPageNumbers)
+                    renderReviews(reviewContainer, feed.reviews, reviewPageNumbers)
                     renderGroups(groupContainer, feed.groups)
                 },
                 onFailure = {
@@ -134,7 +146,9 @@ class HomeFragment : Fragment() {
                         scheduleContainer,
                         announcementContainer,
                         reviewContainer,
-                        groupContainer
+                        groupContainer,
+                        announcementPageNumbers,
+                        reviewPageNumbers
                     )
                 }
             )
@@ -145,7 +159,9 @@ class HomeFragment : Fragment() {
         scheduleContainer: LinearLayout,
         announcementContainer: LinearLayout,
         reviewContainer: LinearLayout,
-        groupContainer: LinearLayout
+        groupContainer: LinearLayout,
+        announcementPageNumbers: LinearLayout,
+        reviewPageNumbers: LinearLayout
     ) {
         // Schedules
         AppContainer.contentRepository.fetchSchedules().fold(
@@ -156,17 +172,17 @@ class HomeFragment : Fragment() {
         // Announcements
         AppContainer.contentRepository.fetchNotices().fold(
             onSuccess = {
-                renderAnnouncements(announcementContainer, it)
+                renderAnnouncements(announcementContainer, it, announcementPageNumbers)
             },
             onFailure = {
-                renderAnnouncements(announcementContainer, emptyList())
+                renderAnnouncements(announcementContainer, emptyList(), announcementPageNumbers)
             }
         )
 
         // Reviews
         AppContainer.contentRepository.fetchReviews().fold(
-            onSuccess = { renderReviews(reviewContainer, it) },
-            onFailure = { renderReviews(reviewContainer, emptyList()) }
+            onSuccess = { renderReviews(reviewContainer, it, reviewPageNumbers) },
+            onFailure = { renderReviews(reviewContainer, emptyList(), reviewPageNumbers) }
         )
 
         // Groups
@@ -196,39 +212,183 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun renderAnnouncements(container: LinearLayout, notices: List<NoticeResponse>) {
+    private fun renderAnnouncements(
+        container: LinearLayout,
+        notices: List<NoticeResponse>,
+        pageNumbers: LinearLayout
+    ) {
         container.removeAllViews()
         if (notices.isEmpty()) {
             addSimpleText(container, getString(R.string.announcement_empty))
+            noticeItems = emptyList()
+            pageNumbers.isVisible = false
             return
         }
-        notices.forEach { announcement ->
+        noticeItems = notices
+        val totalPages = (notices.size + noticesPerPage - 1) / noticesPerPage
+        currentNoticePage = currentNoticePage.coerceIn(0, totalPages - 1)
+        updateAnnouncementPage(container, notices, currentNoticePage, pageNumbers)
+    }
+
+    private fun updateAnnouncementPage(
+        container: LinearLayout,
+        notices: List<NoticeResponse>,
+        pageIndex: Int,
+        pageNumbers: LinearLayout
+    ) {
+        val totalPages = (notices.size + noticesPerPage - 1) / noticesPerPage
+        val safeIndex = pageIndex.coerceIn(0, totalPages - 1)
+        currentNoticePage = safeIndex
+        val start = safeIndex * noticesPerPage
+        val end = minOf(start + noticesPerPage, notices.size)
+        val pageItems = notices.subList(start, end)
+        container.removeAllViews()
+        pageItems.forEach { announcement ->
             val created = announcement.createdAt ?: ""
+            val content = announcement.content ?: ""
+            val preview = truncateText(content, 60)
             addCard(
                 container,
                 announcement.title ?: "",
-                "${announcement.content ?: ""}\n$created"
+                if (created.isNotBlank()) "$preview\n$created" else preview
             ) {
                 showDialog("공지사항", "${announcement.title ?: ""}\n\n${announcement.content ?: ""}")
             }
         }
+        updateAnnouncementPageNumbers(pageNumbers, totalPages, safeIndex)
     }
 
-    private fun renderReviews(container: LinearLayout, reviews: List<ReviewResponse>) {
-        container.removeAllViews()
-        val ctx = requireContext()
+    private fun renderReviews(
+        container: LinearLayout,
+        reviews: List<ReviewResponse>,
+        reviewPageNumbers: LinearLayout
+    ) {
         val items = if (reviews.isNotEmpty()) reviews else emptyList()
         if (items.isEmpty()) {
+            container.removeAllViews()
             addSimpleText(container, getString(R.string.review_empty))
+            reviewItems = emptyList()
+            reviewPageNumbers.isVisible = false
             return
         }
-        items.forEach { review ->
+
+        reviewItems = items
+        reviewPageNumbers.isVisible = true
+
+        val totalPages = (items.size + reviewsPerPage - 1) / reviewsPerPage
+        currentReviewPage = currentReviewPage.coerceIn(0, totalPages - 1)
+
+        updateReviewPage(container, items, currentReviewPage, reviewPageNumbers)
+    }
+
+    private fun updateReviewPage(
+        container: LinearLayout,
+        reviews: List<ReviewResponse>,
+        pageIndex: Int,
+        reviewPageNumbers: LinearLayout
+    ) {
+        val totalPages = (reviews.size + reviewsPerPage - 1) / reviewsPerPage
+        val safeIndex = pageIndex.coerceIn(0, totalPages - 1)
+        currentReviewPage = safeIndex
+
+        val start = safeIndex * reviewsPerPage
+        val end = minOf(start + reviewsPerPage, reviews.size)
+        val pageItems = reviews.subList(start, end)
+
+        container.removeAllViews()
+        pageItems.forEach { review ->
             val rating = review.rating?.let { "⭐ $it" } ?: "⭐"
             val author = review.author ?: ""
-            addCard(container, "$rating · $author", review.content ?: "") {
-                showDialog("수강 후기", "${review.content ?: ""}\n\n- $author")
+            val content = review.content?.trim().orEmpty()
+            val preview = truncateText(content, 60)
+            addCard(container, "$rating · $author", preview) {
+                showDialog("수강 후기", "$content\n\n- $author")
             }
         }
+
+        updateReviewPageNumbers(reviewPageNumbers, totalPages, safeIndex)
+    }
+
+    private fun updateReviewPageNumbers(
+        container: LinearLayout,
+        totalPages: Int,
+        currentIndex: Int
+    ) {
+        container.removeAllViews()
+        if (totalPages <= 1) {
+            container.isVisible = false
+            return
+        }
+        container.isVisible = true
+        val ctx = requireContext()
+        val start = when {
+            totalPages <= 5 -> 0
+            currentIndex <= 2 -> 0
+            currentIndex >= totalPages - 3 -> totalPages - 5
+            else -> currentIndex - 2
+        }
+        val endExclusive = minOf(start + 5, totalPages)
+        for (i in start until endExclusive) {
+            val pageNumber = i + 1
+            val tv = TextView(ctx).apply {
+                text = pageNumber.toString()
+                textSize = 13f
+                setPadding(12, 6, 12, 6)
+                setTextColor(resources.getColor(R.color.purple_500, null))
+                alpha = if (i == currentIndex) 1f else 0.5f
+                setOnClickListener {
+                    updateReviewPage(requireView().findViewById(R.id.reviewList), reviewItems, i, container)
+                }
+            }
+            container.addView(tv)
+        }
+    }
+
+    private fun updateAnnouncementPageNumbers(
+        container: LinearLayout,
+        totalPages: Int,
+        currentIndex: Int
+    ) {
+        container.removeAllViews()
+        if (totalPages <= 1) {
+            container.isVisible = false
+            return
+        }
+        container.isVisible = true
+        val start = when {
+            totalPages <= 5 -> 0
+            currentIndex <= 2 -> 0
+            currentIndex >= totalPages - 3 -> totalPages - 5
+            else -> currentIndex - 2
+        }
+        val endExclusive = minOf(start + 5, totalPages)
+        for (i in start until endExclusive) {
+            val pageNumber = i + 1
+            val tv = TextView(requireContext()).apply {
+                text = pageNumber.toString()
+                textSize = 13f
+                setPadding(12, 6, 12, 6)
+                setTextColor(resources.getColor(R.color.purple_500, null))
+                alpha = if (i == currentIndex) 1f else 0.5f
+                setOnClickListener {
+                    updateAnnouncementPage(
+                        requireView().findViewById(R.id.announcementList),
+                        noticeItems,
+                        i,
+                        container
+                    )
+                }
+            }
+            container.addView(tv)
+        }
+    }
+
+    private fun truncateText(content: String, maxChars: Int): String {
+        val trimmed = content.trim()
+        if (trimmed.length <= maxChars) {
+            return trimmed
+        }
+        return trimmed.take(maxChars).trimEnd() + "..."
     }
 
     private fun renderGroups(container: LinearLayout, groups: List<GroupResponse>) {
@@ -243,7 +403,7 @@ class HomeFragment : Fragment() {
                 container,
                 group.name ?: "그룹",
                 "멤버 ${group.memberCount ?: 0}명"
-            ) { showGroupDetail(group) }
+            ) { navigateToGroups() }
         }
     }
 

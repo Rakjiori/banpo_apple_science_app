@@ -16,10 +16,18 @@ object AppContainer {
     }
 
     val contentRepository: ContentRepository by lazy {
-        ContentRepository(NetworkModule.api)
+        ContentRepository(
+            api = NetworkModule.api,
+            client = NetworkModule.okHttpClient,
+            demoMode = BuildConfig.DEMO_MODE
+        )
     }
 
     val adminRepository: AdminRepository by lazy {
-        AdminRepository(NetworkModule.api)
+        AdminRepository(
+            api = NetworkModule.api,
+            client = NetworkModule.okHttpClient,
+            demoMode = BuildConfig.DEMO_MODE
+        )
     }
 }

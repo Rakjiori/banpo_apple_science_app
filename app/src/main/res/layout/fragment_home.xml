@@ -90,18 +90,12 @@
                     android:showDividers="middle" />
 
                 <LinearLayout
+                    android:id="@+id/reviewPageNumbers"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center"
-                    android:paddingTop="6dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="1  2  3  4  5"
-                        android:textColor="@color/purple_500"
-                        android:textSize="13sp" />
-                </LinearLayout>
+                    android:paddingTop="6dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -139,18 +133,12 @@
                     android:showDividers="middle" />
 
                 <LinearLayout
+                    android:id="@+id/announcementPageNumbers"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center"
-                    android:paddingTop="6dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="1  2  3  4  5"
-                        android:textColor="@color/purple_500"
-                        android:textSize="13sp" />
-                </LinearLayout>
+                    android:paddingTop="6dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
